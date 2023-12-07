@@ -1,3 +1,5 @@
+CREATE DATABASE joy_of_painting_api;
+
 -- Create episodes table
 CREATE TABLE episodes (
     episode_id INTEGER PRIMARY KEY,
