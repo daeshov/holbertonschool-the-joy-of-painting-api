@@ -19,7 +19,6 @@ def process_csv(file_path, has_headers):
         # the name of each header title
         paint_index_index = None
         ep_colors_index = None
-
         # Find the indices of 'paint_index' and 'ep_colors' columns
         if headers:
             for i, header in enumerate(headers):
@@ -29,22 +28,16 @@ def process_csv(file_path, has_headers):
                     ep_colors_index = i
 
         # Load Episode Dates into a dictionary based on title
-        episode_dates = {}
-        try:
-            with open('datasets/The Joy Of Painting - Episode Dates.csv', newline='') as dates_csv:
-                dates_reader = csv.reader(dates_csv)
-                for date_row in dates_reader:
-                    if date_row:
-                        title_with_date = date_row[0]
-                        # Extract date by splitting at "(" and taking the last part
-                        date_parts = title_with_date.split("(")
-                        if len(date_parts) > 1:
-                            date = date_parts[-1].strip(")")
-                            # Ensure better title matching by removing extra whitespaces and quotes
-                            cleaned_title = title_with_date.strip().replace('"', '')
-                            episode_dates[cleaned_title] = date
-        except csv.Error as e:
-            print(f'Error reading data file: {e}')
+        def titles_and_dates(file_path):
+            titles_dates = {}
+            with open(file_path, 'r') as title_date:
+                for row in title_date:
+                    match = re.match(r'"(.*)" \((.*)\)', row)
+                    if match:
+                        title = match.group(1)
+                        date = match.group(2)
+                        titles_dates[title] = date
+            return titles_dates
 
         # Load Colors Used into a dictionary based on title
         colors_used = {}
@@ -65,7 +58,7 @@ def process_csv(file_path, has_headers):
                 ep_colors = row[ep_colors_index].strip() if ep_colors_index is not None else None
                 # Ensure better title matching by removing extra whitespaces and quotes
                 cleaned_title = title_with_date.strip().replace('"', '')
-                date = episode_dates.get(cleaned_title, '')
+                date = titles_and_dates(file_paths[0]).get(cleaned_title, '')
                 colors = colors_used.get(cleaned_title, '')
 
                 data.append({
@@ -81,7 +74,7 @@ def process_csv(file_path, has_headers):
 
     return data
 
-file_paths = ['datasets/The Joy Of Painting - Episode Dates.csv', 'datasets/The Joy Of Painting - Colors Used.csv', 'datasets/The Joy Of Painting - Subject Matter.csv']
+file_paths = ['datasets/The Joy Of Painting - Episode Dates', 'datasets/The Joy Of Painting - Colors Used.csv', 'datasets/The Joy Of Painting - Subject Matter.csv']
 has_headers = [False, True, True]
 result = []
 
